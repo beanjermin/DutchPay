@@ -12,13 +12,18 @@ db.once('open', () => console.log('Connection Successful'));
 const sessionSchema = mongoose.Schema({
   sessionId: { type: String, unique: true },
   sessionUsers: [String],
+  receiptInfo: String,
+  itemList: String,
 });
 
 // ============= Create a Model =================
 const Session = mongoose.model('Session', sessionSchema);
 
 module.exports = {
-  save: (sesh) => Session.findOneAndUpdate({ sessionId: sesh.sessionId }, { $push: { sessionUsers: sesh.sessionUsers } }, { upsert: true }),
+  save: (sesh) => {
+    console.log('SESHHH', sesh);
+    return Session.findOneAndUpdate({ sessionId: sesh.sessionId }, { $push: { sessionUsers: sesh.sessionUsers }, receiptInfo: sesh.receiptInfo, itemList: sesh.itemList }, { upsert: true })
+  },
   getById: (sesh) => Session.findOne({ sessionId: sesh.sessionId }).exec(),
   removeSession: (sesh) => Session.deleteOne({ sessionId: sesh.sessionId }),
 };

@@ -1,14 +1,17 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import axios from 'axios';
 import UploadPage from './UploadPage';
 import BillOverview from './BillOverview';
 
 export default function App() {
+  const [receiptInfo, setReceiptInfo] = useState('');
+  const [itemList, setItemList] = useState('');
   const [sessionInfo, setSessionInfo] = useState({});
   const [newUsername, setNewUsername] = useState('');
   const [username, setUsername] = useState('');
   const [sessionCode, setSessionCode] = useState('');
   const [page, setPage] = useState('');
+  const [updateSession, setUpdateSession] = useState(false);
 
   const submitSessionCode = (code, user) => {
     const query1 = {
@@ -20,16 +23,13 @@ export default function App() {
           const query2 = {
             sessionId: data.sessionId,
             sessionUsers: user,
+            receiptInfo: JSON.parse(data.receiptInfo),
+            itemList: JSON.parse(data.itemList),
           };
-          axios.post('/dutchpay', query2)
-            .then(() => {
-              console.log('Successfully posted new user');
-              setSessionCode('');
-              setUsername('');
-              setSessionInfo(query2);
-              setPage('bill');
-            })
-            .catch((err) => console.error('Error posting new user', err));
+          setSessionCode('');
+          setUsername('');
+          setSessionInfo(query2);
+          setPage('bill');
         }
       })
       .catch((err) => console.error('There was a problem finding the session', err));
@@ -52,6 +52,8 @@ export default function App() {
     const query = {
       sessionId: newSessionId,
       sessionUsers: name,
+      receiptInfo: receiptInfo,
+      itemList: itemList,
     };
     if (name.length >= 3) {
       axios.post('/dutchpay', query)
@@ -70,9 +72,25 @@ export default function App() {
     }
   };
 
-  const renderBillOverview = (form) => {
-    setPage(form);
+  const renderBillOverview = async (form, receipt, list) => {
+    await setReceiptInfo(receipt);
+    await setItemList(list);
+    await setUpdateSession(true);
+    await setPage(form);
   };
+
+  if (updateSession) {
+    axios.post('/dutchpay', {
+      sessionId: sessionInfo.sessionId,
+      receiptInfo: JSON.stringify(receiptInfo),
+      itemList: JSON.stringify(itemList),
+    })
+      .then(() => {
+        setUpdateSession(false);
+        console.log('success!');
+      })
+      .catch((err) => console.error('error', err));
+  }
 
   if (page === 'upload' && sessionInfo) {
     return (
@@ -81,7 +99,7 @@ export default function App() {
   }
   if (page === 'bill') {
     return (
-      <BillOverview sessionInfo={sessionInfo} />
+      <BillOverview sessionInfo={sessionInfo} receiptInfo={receiptInfo} itemList={itemList} />
     );
   }
   if (page === 'split') {

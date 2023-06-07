@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-function BillOverview({ sessionInfo }) {
+function BillOverview({ sessionInfo, receiptInfo, itemList }) {
   return (
     <div className="bill_overview">
       <header>
@@ -22,16 +22,50 @@ function BillOverview({ sessionInfo }) {
           </div>
         </div>
         <div className="receipt_content">
-          <div><p>BLAH BLAH BLAH</p><p>Price</p></div>
-          <div><p>BLAH BLAH BLAH</p><p>Price</p></div>
-          <div><p>BLAH BLAH BLAH</p><p>Price</p></div>
-          <div><p>BLAH BLAH BLAH</p><p>Price</p></div>
-          <div><p>BLAH BLAH BLAH</p><p>Price</p></div>
+          {itemList && (itemList.map((item) => (
+            <div className="items">
+              <p>{item.name}</p>
+              <p>
+                $
+                {item.price}
+              </p>
+            </div>
+          )))}
+          {sessionInfo.itemList.length > 1 && (sessionInfo.itemList.map((item) => (
+            <div className="items">
+              <p>{item.name}</p>
+              <p>
+                $
+                {item.price}
+              </p>
+            </div>
+          )))}
         </div>
         <div className="total_cost">
-          <div>Sales Tax</div>
-          <div>Tip</div>
-          <div>Total</div>
+          <div>
+            Sales Tax: &nbsp;
+            $
+            { receiptInfo && (receiptInfo.tax) }
+            { sessionInfo.receiptInfo.tax && (
+              sessionInfo.receiptInfo.tax) }
+          </div>
+          <div>
+            Tip: &nbsp;
+            $
+            { receiptInfo && (
+              receiptInfo.tipAmount || 0)}
+            { sessionInfo.receiptInfo.tipAmount && (
+              sessionInfo.receiptInfo.tipAmount
+            )}
+          </div>
+          <div>
+            Total: &nbsp;
+            $
+            { receiptInfo && (receiptInfo.total) }
+            { sessionInfo.receiptInfo.total && (
+              sessionInfo.receiptInfo.total
+            )}
+          </div>
         </div>
       </div>
       <button type="button">Split</button>
