@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import UploadPage from './UploadPage';
 import BillOverview from './BillOverview';
+import SplitPage from './SplitPage';
 import io from 'socket.io-client';
 const socket = io.connect('http://localhost:3001');
 
@@ -14,6 +15,7 @@ export default function App() {
   const [sessionCode, setSessionCode] = useState('');
   const [page, setPage] = useState('');
   const [updateSession, setUpdateSession] = useState(false);
+  const [updatePairs, setUpdatePairs] = useState([]);
 
   const submitSessionCode = (code, user) => {
     const query1 = {
@@ -75,11 +77,18 @@ export default function App() {
     }
   };
 
-  const renderBillOverview = async (form, receipt, list) => {
+  const renderBillOverview = async (form, receipt, list, info) => {
     await setReceiptInfo(receipt);
     await setItemList(list);
     await setUpdateSession(true);
+    await socket.emit('join_room', info.sessionId, info.sessionUsers);
     await setPage(form);
+  };
+
+  const renderSplitPage = async (page, pairs) => {
+    await setUpdatePairs(pairs);
+    await socket.emit('split_page', pairs);
+    await setPage(page);
   };
 
   if (updateSession) {
@@ -102,12 +111,12 @@ export default function App() {
   }
   if (page === 'bill') {
     return (
-      <BillOverview sessionInfo={sessionInfo} receiptInfo={receiptInfo} itemList={itemList} />
+      <BillOverview sessionInfo={sessionInfo} receiptInfo={receiptInfo} itemList={itemList} renderSplitPage={renderSplitPage} />
     );
   }
   if (page === 'split') {
     return (
-      <SplitPage />
+      <SplitPage updatePairs={updatePairs} />
     );
   }
 

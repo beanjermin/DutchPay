@@ -3,12 +3,12 @@ const path = require('path');
 const express = require('express');
 const morgan = require('morgan');
 const http = require('http');
-const { Server } = require("socket.io");
+const { Server } = require('socket.io');
 const cors = require('cors');
 
 const app = express();
+const { Configuration, OpenAIApi } = require('openai');
 const { save, getById, removeSession } = require('./db');
-const { Configuration, OpenAIApi } = require('openai')
 
 app.use(cors());
 app.use(morgan('dev'));
@@ -32,16 +32,23 @@ io.on('connection', (socket) => {
 
   socket.on('join_room', (roomId, username) => {
     socket.join(roomId);
-    console.log('1')
-    socket.emit('user_joined', username);
-    console.log('2')
+    console.log('1');
+    socket.broadcast.emit('user_joined', username);
+    console.log('2');
   });
-  // socket.on('user_list', (sessionMembers) => {
-  //   console.log('this is happening')
-  //   socket.emit('update_userlist', sessionMembers);
-  // });
-
-
+  socket.on('update_user_list', (users, code) => {
+    console.log('this shiett is happening in server', users);
+    console.log('code', code);
+    // console.log('rooomm info', io.in(code))
+    socket.broadcast.emit('user_list', users);
+    console.log('bruh cmon');
+  });
+  socket.on('update_select_user', (pairs, e) => {
+    socket.broadcast.emit('update_select', pairs, e);
+  });
+  socket.on('split_page', (pairs) => {
+    socket.emit('userPairs', pairs);
+  });
 
   socket.on('disconnect', () => {
     console.log('User disconnected', socket.id);

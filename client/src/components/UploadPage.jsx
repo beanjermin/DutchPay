@@ -100,7 +100,7 @@ function UploadPage({ sessionInfo, renderBillOverview }) {
         {interpreting && (
           <img src={thinker} alt="thinking gif" />
         )}
-        <button type="button" onClick={() => renderBillOverview('bill', receiptObj, itemList)}>Create Split Session!</button>
+        <button type="button" onClick={() => renderBillOverview('bill', receiptObj, itemList, sessionInfo)}>Create Split Session!</button>
       </div>
     </div>
   );
