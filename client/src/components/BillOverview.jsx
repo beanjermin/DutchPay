@@ -1,13 +1,40 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import io from 'socket.io-client';
+const socket = io.connect('http://localhost:3001');
 
 function BillOverview({ sessionInfo, receiptInfo, itemList }) {
+  const [sessionMembers, setSessionMembers] = useState([]);
+
+
+  // socket.on('update_userlist', (usersArr) => {
+  //   console.log('herehrehehreh')
+  //   setSessionMembers([...sessionMembers, ...usersArr]);
+  // })
+
+  socket.on('user_joined', (username) => {
+    console.log('this is happening')
+    setSessionMembers([...sessionMembers, ...[username]])
+  });
+
+  // useEffect(() => {
+  //   console.log('SESSION MEMBERS', sessionMembers);
+  // }, [socket]);
+
+  // useEffect(() => {
+  //   socket.emit('user_list', sessionMembers);
+  // }, []);
+
+
   return (
     <div className="bill_overview">
       <header>
         <h1>DUTCH PAY</h1>
       </header>
       <div className="bo_session_members">
-        Session Members
+        <h3>Session Members</h3>
+        {sessionMembers.map((user) => (
+          <div>{user}</div>
+        ))}
       </div>
       <div className="bo_container">
         <h3>Bill Overview</h3>

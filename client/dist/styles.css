@@ -98,10 +98,20 @@ button {
   text-align: center;
 }
 .upload_container button {
-  /* max-width: 300px; */
-  margin-top: 50px;
-  margin-bottom: 30px;
   width: 80%;
+}
+.upload_container img {
+  width: 200px;
+  height: 200px;
+  margin: auto;
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+.text_content {
+  margin: auto;
+  margin-top: 20px;
+  margin-bottom: 20px;
+  width: 300px;
 }
 
 

@@ -2,16 +2,51 @@ require('dotenv').config();
 const path = require('path');
 const express = require('express');
 const morgan = require('morgan');
-const { Configuration, OpenAIApi } = require('openai')
-const { save, getById, removeSession } = require('./db');
+const http = require('http');
+const { Server } = require("socket.io");
+const cors = require('cors');
 
 const app = express();
-app.use(morgan('dev'));
+const { save, getById, removeSession } = require('./db');
+const { Configuration, OpenAIApi } = require('openai')
 
+app.use(cors());
+app.use(morgan('dev'));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-
 app.use(express.static(path.join(__dirname, '../client/dist')));
+
+const server = http.createServer(app);
+server.listen(3001, () => {
+  console.log('IO Server is connected on PORT 3001');
+});
+const io = new Server(server, {
+  cors: {
+    origin: 'http://localhost:3000',
+    methods: ['GET', 'POST'],
+  },
+});
+
+io.on('connection', (socket) => {
+  console.log('User is connected: ', socket.id);
+
+  socket.on('join_room', (roomId, username) => {
+    socket.join(roomId);
+    console.log('1')
+    socket.emit('user_joined', username);
+    console.log('2')
+  });
+  // socket.on('user_list', (sessionMembers) => {
+  //   console.log('this is happening')
+  //   socket.emit('update_userlist', sessionMembers);
+  // });
+
+
+
+  socket.on('disconnect', () => {
+    console.log('User disconnected', socket.id);
+  });
+});
 
 app.post('/dutchpay', (req, res) => {
   save(req.body)
@@ -45,7 +80,7 @@ const openai = new OpenAIApi(new Configuration({
 app.get('/dutchpay/openai', (req, res) => {
   openai.createCompletion({
     model: 'text-davinci-003',
-    prompt: `extract the items, item quantity, item prices, tax amount, tips, and total amount from ${req.query.data} omitting all "$" symbols in the result and ensuring that the tax amount is always less than the total. Then return the data as a JSON object that is strictly structured as such:
+    prompt: `Intuitively extract the items, item quantity, item prices, tax amount, tips, and total amount from ${req.query.data} omitting all "$" symbols in the result and ensure that the tax amount is a reasonable number. Then return the data as a JSON object that is strictly structured as such:
     {
       "items": [
         {
@@ -65,9 +100,8 @@ app.get('/dutchpay/openai', (req, res) => {
         }, ...
       ]
     }`,
-    temperature: 0.6,
-    top_p: 1,
-    max_tokens: 700,
+    temperature: 0.3,
+    max_tokens: 2049,
   })
     .then(({ data }) => {
       console.log('OPENAI DATA', data.choices[0].text);
@@ -78,5 +112,5 @@ app.get('/dutchpay/openai', (req, res) => {
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`Server available at http://localhost:${PORT}`);
+  console.log(`Express server available at http://localhost:${PORT}`);
 });

@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import UploadPage from './UploadPage';
 import BillOverview from './BillOverview';
+import io from 'socket.io-client';
+const socket = io.connect('http://localhost:3001');
 
 export default function App() {
   const [receiptInfo, setReceiptInfo] = useState('');
@@ -26,6 +28,7 @@ export default function App() {
             receiptInfo: JSON.parse(data.receiptInfo),
             itemList: JSON.parse(data.itemList),
           };
+          socket.emit('join_room', data.sessionId, user);
           setSessionCode('');
           setUsername('');
           setSessionInfo(query2);

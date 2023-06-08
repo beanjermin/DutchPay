@@ -1,12 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import Tesseract from 'tesseract.js';
+import calc from "../../assets/calculating.gif";
+import thinker from "../../assets/interpreting.gif";
 
 function UploadPage({ sessionInfo, renderBillOverview }) {
   const [image, setImage] = useState('');
   const [receipt, setReceipt] = useState('');
   const [receiptObj, setReceiptObj] = useState({});
   const [itemList, setItemList] = useState([]);
+  const [convertBtn, setConvertBtn] = useState(true);
+  const [interpretBtn, setInterpretBtn] = useState(true);
+  const [converting, setConverting] = useState(false);
+  const [interpreting, setInterpreting] = useState(false);
 
   const handleImage = (e) => {
     console.log(e.target.files);
@@ -14,13 +20,17 @@ function UploadPage({ sessionInfo, renderBillOverview }) {
   };
 
   const handleConvert = (img) => {
+    setConverting(true);
+    setConvertBtn(false);
     Tesseract.recognize(
       img,
       'eng+kor',
-      { logger: (m) => console.log(m) })
+      { logger: (m) => console.log(m) },
+    )
       .then(({ data: { text } }) => {
         console.log(text);
         setReceipt(text);
+        setConverting(false);
       })
       .catch((err) => console.error('Error reading receipt', err));
   };
@@ -45,11 +55,14 @@ function UploadPage({ sessionInfo, renderBillOverview }) {
   };
 
   const handleInterpret = (stub) => {
+    setInterpretBtn(false);
+    setInterpreting(true);
     axios.get('/dutchpay/openai', { params: { data: stub } })
       .then(({ data }) => {
         console.log(JSON.parse(data));
         setReceiptObj(JSON.parse(data));
         setItemList(itemsArr(JSON.parse(data)));
+        setInterpreting(false);
       })
       .catch((err) => console.error(err));
   };
@@ -75,10 +88,18 @@ function UploadPage({ sessionInfo, renderBillOverview }) {
           <input type="file" id="file" onChange={handleImage} />
         </label>
         {receipt && (
-          <div>{receipt}</div>
+          <div className="text_content">{receipt}</div>
         )}
-        <button type="button" onClick={() => handleConvert(image)}>Convert</button>
-        <button type="button" onClick={() => handleInterpret(receipt)}>Interpret</button>
+        {converting && (
+          <img src={calc} alt="calculating gif" />
+        )}
+        {convertBtn && (
+        <button type="button" onClick={() => handleConvert(image)}>Convert</button>)}
+        {interpretBtn && (
+        <button type="button" onClick={() => handleInterpret(receipt)}>Interpret</button>)}
+        {interpreting && (
+          <img src={thinker} alt="thinking gif" />
+        )}
         <button type="button" onClick={() => renderBillOverview('bill', receiptObj, itemList)}>Create Split Session!</button>
       </div>
     </div>
