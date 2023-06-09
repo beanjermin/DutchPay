@@ -4,14 +4,6 @@ body {
   max-width: 65%;
   margin: auto;
 }
-
-.login {
-  color: #4d774c;
-}
-.login h1 {
-  text-align: center;
-  margin-bottom: 40px;
-}
 form {
   margin: 12% auto;
   background-color: #f7f7f9;
@@ -31,7 +23,6 @@ form {
   font-weight: 700;
   font-size: 15px;
 }
-
 input, select {
   width: 100%;
   padding: 12px 20px;
@@ -39,6 +30,9 @@ input, select {
   display: inline-block;
   border: 1px solid #ccc;
   box-sizing: border-box;
+}
+select {
+  cursor: pointer;
 }
 button {
   background-color: #4d774c;
@@ -48,6 +42,16 @@ button {
   border: none;
   cursor: pointer;
   width: 100%;
+}
+button:hover {
+  transform: scale(1.05) perspective(1px);
+}
+.login {
+  color: #4d774c;
+}
+.login h1 {
+  text-align: center;
+  margin-bottom: 40px;
 }
 
 
@@ -156,9 +160,6 @@ button {
   margin-bottom: 10px;
   margin-top: 20px;
 }
-.bill_overview button {
-  width: 400px;
-}
 .receipt_content {
   display: flex;
   flex-direction: column;
@@ -181,6 +182,24 @@ button {
   border: solid 0.5px;
   border-radius: 10px;
 }
+.tip {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  white-space: pre;
+  margin-right: 10px;
+}
+.tip_input {
+  margin-left: 8px;
+  height: 10px;
+}
+.tip button {
+  height: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 10px;
+}
 .total_cost {
   display: flex;
   flex-direction: column;
@@ -188,8 +207,9 @@ button {
   width: 80%;
   margin-bottom: 15px;
 }
-.bill_overview button {
+.bill_overview_btn {
   margin-bottom: 50px;
+  width: 400px;
 }
 
 
@@ -204,7 +224,6 @@ button {
   flex-direction: column;
   min-width: 400px;
   min-height: 400px;
-  /* justify-content: space-evenly; */
   background-color: #f7f7f9;
   align-items: start;
   width: 400px;
@@ -218,12 +237,25 @@ button {
   flex-direction: column;
   margin-bottom: 30px;
   width: 80%;
+  justify-content: space-evenly;
+  align-items: flex-start;
+}
+.split_user_container {
+  display: flex;
+  flex-direction: row;
+  margin: auto;
+  width: 70%;
 }
 .split_user {
   display: flex;
   flex-direction: row;
   justify-content: space-around;
   margin-left: 40px;
+  align-items: center;
+}
+.split_user p {
+  margin-right: 30px;
+  height: 20px;
 }
 
 .item_name {

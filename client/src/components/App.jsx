@@ -8,6 +8,8 @@ const socket = io.connect('http://localhost:3001');
 
 export default function App() {
   const [receiptInfo, setReceiptInfo] = useState('');
+  const [tipAmount, setTipAmount] = useState('');
+  const [flagTip, setFlagTip] = useState(false);
   const [itemList, setItemList] = useState('');
   const [sessionInfo, setSessionInfo] = useState({});
   const [newUsername, setNewUsername] = useState('');
@@ -85,10 +87,17 @@ export default function App() {
     await setPage(form);
   };
 
-  const renderSplitPage = async (page, pairs) => {
-    await setUpdatePairs(pairs);
-    await socket.emit('split_page', pairs);
-    await setPage(page);
+  const renderSplitPage = async (form, pairs, receipt, tip) => {
+    try {
+      await setTipAmount(Number(tip));
+      await setReceiptInfo(receipt);
+      await setUpdatePairs(pairs);
+      await socket.emit('split_page', pairs);
+      await setFlagTip(true);
+      await setPage(form);
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   if (updateSession) {
@@ -114,9 +123,9 @@ export default function App() {
       <BillOverview sessionInfo={sessionInfo} receiptInfo={receiptInfo} itemList={itemList} renderSplitPage={renderSplitPage} />
     );
   }
-  if (page === 'split') {
+  if (page === 'split' && flagTip) {
     return (
-      <SplitPage updatePairs={updatePairs} />
+      <SplitPage updatePairs={updatePairs} receiptInfo={receiptInfo} tipAmount={tipAmount} />
     );
   }
 

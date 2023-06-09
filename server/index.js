@@ -49,6 +49,9 @@ io.on('connection', (socket) => {
   socket.on('split_page', (pairs) => {
     socket.emit('userPairs', pairs);
   });
+  socket.on('setting_tip', (tip) => {
+    socket.broadcast.emit('set_tip', tip);
+  });
 
   socket.on('disconnect', () => {
     console.log('User disconnected', socket.id);

@@ -7,21 +7,20 @@ function BillOverview({ sessionInfo, receiptInfo, itemList, renderSplitPage }) {
   const [sessionMembers, setSessionMembers] = useState([]);
   const [change, setChange] = useState(false);
   const [itemPairs, setItemPairs] = useState([]);
+  const [tip, setTip] = useState('');
+  const [chaching, setChaching] = useState(false);
   const [newPairs, setNewPairs] = useState(false);
   const [selectVal, setSelectVal] = useState([Array(sessionInfo.itemList.length).fill('')]);
 
   socket.on('user_list', (users) => {
-    // console.log('final step', users);
     if (sessionMembers.filter((user) => user === users || users.includes(user)).length < 1) {
       setSessionMembers([...sessionMembers, ...users]);
     }
   });
 
   socket.on('user_joined', (username) => {
-    // console.log('this is happening')
     setSessionMembers([...sessionMembers, username]);
     setChange(true);
-    // console.log('sessionmembers', sessionMembers);
   });
   if (change) {
     socket.emit('update_user_list', sessionMembers, sessionInfo.sessionId);
@@ -34,7 +33,6 @@ function BillOverview({ sessionInfo, receiptInfo, itemList, renderSplitPage }) {
       price: item.price,
       user: e,
     };
-    console.log('E', e, 'item', item.name);
     setItemPairs([...itemPairs, itemPair]);
 
     const newArr = selectVal;
@@ -42,24 +40,25 @@ function BillOverview({ sessionInfo, receiptInfo, itemList, renderSplitPage }) {
     setSelectVal(newArr);
     setNewPairs(true);
   };
+
   if (newPairs) {
-    console.log('ITEMMM HERERHERHE', itemPairs)
-    console.log('selectVal', selectVal);
     socket.emit('update_select_user', itemPairs[itemPairs.length - 1], selectVal);
     setNewPairs(false);
   }
 
   socket.on('update_select', (pairs, e) => {
-    console.log('OBJECTVALUES', Object.values(itemPairs).map((obj) => obj.user))
-    console.log('PAIRSUSERS', e)
     setItemPairs([...itemPairs, pairs]);
     setSelectVal(e);
   });
 
-  console.log('itemPairs', itemPairs);
-  console.log('selectVal', selectVal);
-  // console.log('sessionInfo', sessionInfo.itemList);
-  // console.log('SESSSION MEMBERSSS', sessionMembers);
+  const handleTip = (fee) => {
+    setChaching(true);
+    socket.emit('setting_tip', fee);
+  };
+  socket.on('set_tip', (gratuity) => {
+    setChaching(true);
+    setTip(gratuity);
+  });
 
   return (
     <div className="bill_overview">
@@ -128,14 +127,12 @@ function BillOverview({ sessionInfo, receiptInfo, itemList, renderSplitPage }) {
             { sessionInfo.receiptInfo.tax && (
               sessionInfo.receiptInfo.tax) }
           </div>
-          <div>
-            Tip: &nbsp;
-            $
-            { receiptInfo && (
-              receiptInfo.tipAmount || 0)}
-            { sessionInfo.receiptInfo.tipAmount && (
-              sessionInfo.receiptInfo.tipAmount
-            )}
+          <div className="tip">
+            Tip: $
+            <input className="tip_input" type="text" value={tip} placeholder="0.00" onChange={(e) => setTip(e.target.value)} />
+            <button className="tip_btn" type="button" onClick={() => handleTip(tip)}>Set Tip</button>
+            {chaching && (
+            <p>Cha-Ching!</p>)}
           </div>
           <div>
             Total: &nbsp;
@@ -147,7 +144,7 @@ function BillOverview({ sessionInfo, receiptInfo, itemList, renderSplitPage }) {
           </div>
         </div>
       </div>
-      <button type="button" onClick={() => renderSplitPage('split', itemPairs)}>Split</button>
+      <button className="bill_overview_btn" type="button" onClick={() => renderSplitPage('split', itemPairs, sessionInfo.receiptInfo, tip)}>Split</button>
     </div>
   );
 }
